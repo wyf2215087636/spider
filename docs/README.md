@@ -11,6 +11,7 @@
 7. `chat-ui-design-spec-v0.1.md`：Chat工作台UI设计规范（现行前端体验基线）
 8. `i18n-globalization-strategy-v0.1.md`：国际化（中英）方案（现行语言基线）
 9. `ai-development-worklog-v0.1.md`：开发留存日志（持续追加）
+10. `multimodal-doc-center-design-v0.1.md`：多模态文档中心分阶段方案（文档/AI修订/版本治理）
 
 ## 2. 新增文档规则
 

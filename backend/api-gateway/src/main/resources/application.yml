@@ -23,3 +23,13 @@ mybatis-plus:
   type-handlers-package: com.spider.apigateway.config
   configuration:
     map-underscore-to-camel-case: true
+
+spider:
+  llm:
+    enabled: ${LLM_ENABLED:true}
+    provider: ${LLM_PROVIDER:deepseek}
+    base-url: ${LLM_BASE_URL:https://api.deepseek.com}
+    api-key: ${LLM_API_KEY:sk-6cb943b2615a4f43831ffd082e0467d2}
+    model: ${LLM_MODEL:deepseek-chat}
+    temperature: ${LLM_TEMPERATURE:0.2}
+    timeout-seconds: ${LLM_TIMEOUT_SECONDS:45}

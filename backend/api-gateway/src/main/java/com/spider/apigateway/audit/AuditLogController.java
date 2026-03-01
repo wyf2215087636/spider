@@ -1,6 +1,8 @@
 package com.spider.apigateway.audit;
 
 import com.spider.apigateway.audit.dto.AuditLogResponse;
+import com.spider.apigateway.audit.dto.ProjectAuditFilterOptionResponse;
+import com.spider.apigateway.audit.dto.WorkspaceAuditFilterOptionResponse;
 import com.spider.common.api.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,5 +27,15 @@ public class AuditLogController {
             @RequestParam(required = false) Integer limit
     ) {
         return ApiResponse.success(auditLogService.list(resourceType, resourceId, limit));
+    }
+
+    @GetMapping("/workspace-options")
+    public ApiResponse<List<WorkspaceAuditFilterOptionResponse>> listWorkspaceOptions() {
+        return ApiResponse.success(auditLogService.listWorkspaceFilterOptions());
+    }
+
+    @GetMapping("/project-options")
+    public ApiResponse<List<ProjectAuditFilterOptionResponse>> listProjectOptions() {
+        return ApiResponse.success(auditLogService.listProjectFilterOptions());
     }
 }

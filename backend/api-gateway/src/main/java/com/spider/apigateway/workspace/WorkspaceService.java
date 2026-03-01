@@ -2,6 +2,8 @@ package com.spider.apigateway.workspace;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.spider.apigateway.audit.AuditLogService;
+import com.spider.apigateway.exception.WorkspaceHasProjectsException;
+import com.spider.apigateway.project.ProjectService;
 import com.spider.apigateway.exception.WorkspaceNotFoundException;
 import com.spider.apigateway.workspace.dto.CreateWorkspaceRequest;
 import com.spider.apigateway.workspace.dto.UpdateWorkspaceRequest;
@@ -20,10 +22,16 @@ public class WorkspaceService {
     private static final Logger log = LoggerFactory.getLogger(WorkspaceService.class);
     private final WorkspaceMapper workspaceMapper;
     private final AuditLogService auditLogService;
+    private final ProjectService projectService;
 
-    public WorkspaceService(WorkspaceMapper workspaceMapper, AuditLogService auditLogService) {
+    public WorkspaceService(
+            WorkspaceMapper workspaceMapper,
+            AuditLogService auditLogService,
+            ProjectService projectService
+    ) {
         this.workspaceMapper = workspaceMapper;
         this.auditLogService = auditLogService;
+        this.projectService = projectService;
     }
 
     public WorkspaceResponse create(CreateWorkspaceRequest request) {
@@ -82,6 +90,10 @@ public class WorkspaceService {
     public void delete(UUID workspaceId) {
         log.info("workspace.delete start workspaceId={}", workspaceId);
         WorkspaceEntity entity = getById(workspaceId);
+        int projectCount = projectService.countByWorkspaceId(workspaceId);
+        if (projectCount > 0) {
+            throw new WorkspaceHasProjectsException(workspaceId);
+        }
         workspaceMapper.deleteById(entity.getId());
         log.info("workspace.delete success workspaceId={}", entity.getId());
         auditLogService.recordSuccess(

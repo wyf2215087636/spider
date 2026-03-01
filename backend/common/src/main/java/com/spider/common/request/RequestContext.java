@@ -3,6 +3,7 @@ package com.spider.common.request;
 public final class RequestContext {
     private static final ThreadLocal<String> REQUEST_ID_HOLDER = new ThreadLocal<>();
     private static final ThreadLocal<String> ACTOR_HOLDER = new ThreadLocal<>();
+    private static final ThreadLocal<String> ROLE_HOLDER = new ThreadLocal<>();
 
     private RequestContext() {
     }
@@ -21,11 +22,21 @@ public final class RequestContext {
 
     public static String getActor() {
         String actor = ACTOR_HOLDER.get();
-        return actor == null || actor.isBlank() ? "system" : actor;
+        return actor == null || actor.isBlank() ? "anonymous" : actor;
+    }
+
+    public static void setRole(String role) {
+        ROLE_HOLDER.set(role);
+    }
+
+    public static String getRole() {
+        String role = ROLE_HOLDER.get();
+        return role == null || role.isBlank() ? "anonymous" : role;
     }
 
     public static void clear() {
         REQUEST_ID_HOLDER.remove();
         ACTOR_HOLDER.remove();
+        ROLE_HOLDER.remove();
     }
 }

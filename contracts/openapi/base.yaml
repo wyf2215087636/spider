@@ -23,6 +23,45 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponseHealth"
 
+  /api/v1/auth/login:
+    post:
+      summary: Login by username and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseLogin"
+
+  /api/v1/auth/me:
+    get:
+      summary: Get current authenticated user profile
+      responses:
+        "200":
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUserProfile"
+
+  /api/v1/auth/logout:
+    post:
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logout success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseString"
+
   /api/v1/workspaces:
     get:
       summary: List workspaces
@@ -111,6 +150,752 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponseDelete"
 
+  /api/v1/projects:
+    get:
+      summary: List projects
+      parameters:
+        - in: query
+          name: workspaceId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Project list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProjectList"
+    post:
+      summary: Create project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProjectRequest"
+      responses:
+        "200":
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProject"
+
+  /api/v1/projects/{projectId}:
+    get:
+      summary: Get project detail
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Project detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProject"
+    put:
+      summary: Update project
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProjectRequest"
+      responses:
+        "200":
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProject"
+    delete:
+      summary: Delete project
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Project deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseDelete"
+
+  /api/v1/product-docs:
+    get:
+      summary: List product documents
+      parameters:
+        - in: query
+          name: projectId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Product document list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocList"
+    post:
+      summary: Create product document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductDocRequest"
+      responses:
+        "200":
+          description: Product document created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocDetail"
+
+  /api/v1/product-docs/{docId}:
+    get:
+      summary: Get product document detail
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Product document detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocDetail"
+    put:
+      summary: Update product document draft
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductDocRequest"
+      responses:
+        "200":
+          description: Product document updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocDetail"
+
+  /api/v1/product-docs/{docId}/publish-version:
+    post:
+      summary: Publish a new immutable product document version from current draft
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublishProductDocVersionRequest"
+      responses:
+        "200":
+          description: Product document version published
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocDetail"
+
+  /api/v1/product-docs/{docId}/versions:
+    get:
+      summary: List product document versions
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Product document version list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocVersionList"
+
+  /api/v1/product-docs/{docId}/versions/{versionId}:
+    get:
+      summary: Get product document version detail
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: versionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Product document version detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocVersion"
+
+  /api/v1/product-docs/{docId}/rollback:
+    post:
+      summary: Roll back to an existing version and publish as a new version
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RollbackProductDocRequest"
+      responses:
+        "200":
+          description: Product document rolled back
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocDetail"
+
+  /api/v1/product-docs/{docId}/ai-chat/messages:
+    get:
+      summary: List product document AI chat messages
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Product document AI chat messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocAiMessageList"
+    post:
+      summary: Send an AI instruction message for product document revision
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductDocAiMessageRequest"
+      responses:
+        "200":
+          description: AI revision candidate generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocAiGenerate"
+
+  /api/v1/product-docs/{docId}/ai-chat/messages/stream:
+    post:
+      summary: Stream AI revision for current product document draft
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductDocAiMessageRequest"
+      responses:
+        "200":
+          description: Server-Sent Events stream, emits `delta` and `done` events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /api/v1/product-docs/{docId}/ai-revisions:
+    get:
+      summary: List product document AI revision candidates
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [pending, confirmed, rejected]
+      responses:
+        "200":
+          description: Product document AI revision list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocRevisionList"
+
+  /api/v1/product-docs/{docId}/ai-revisions/{revisionId}/confirm:
+    post:
+      summary: Confirm AI revision and publish as a new product document version
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: revisionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmProductDocRevisionRequest"
+      responses:
+        "200":
+          description: AI revision confirmed and version published
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocDetail"
+
+  /api/v1/product-docs/{docId}/ai-revisions/{revisionId}/reject:
+    post:
+      summary: Reject AI revision candidate
+      parameters:
+        - in: path
+          name: docId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: revisionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectProductDocRevisionRequest"
+      responses:
+        "200":
+          description: AI revision rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductDocRevision"
+
+  /api/v1/chat-sessions:
+    get:
+      summary: List current actor chat sessions
+      parameters:
+        - in: query
+          name: projectId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: role
+          required: false
+          schema:
+            type: string
+            enum: [product, backend, frontend, test]
+      responses:
+        "200":
+          description: Chat session list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseChatSessionList"
+    post:
+      summary: Create private chat session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChatSessionRequest"
+      responses:
+        "200":
+          description: Chat session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseChatSession"
+
+  /api/v1/chat-sessions/{sessionId}/publish:
+    post:
+      summary: Create requirement package draft from private chat session
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublishRequirementHandoffRequest"
+      responses:
+        "200":
+          description: Requirement handoff published
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseRequirementHandoff"
+
+  /api/v1/chat-sessions/{sessionId}/messages:
+    get:
+      summary: List private chat messages for selected session
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Chat message list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseChatMessageList"
+    post:
+      summary: Send a message to chat session and get AI reply
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChatMessageRequest"
+      responses:
+        "200":
+          description: AI reply message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseChatMessage"
+
+  /api/v1/chat-sessions/{sessionId}/ai-draft:
+    post:
+      summary: Generate AI draft handoff package from session context and code impact analysis
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateAiDraftRequest"
+      responses:
+        "200":
+          description: AI draft package
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseAiDraft"
+
+  /api/v1/requirement-handoffs:
+    get:
+      summary: List published requirement handoffs
+      parameters:
+        - in: query
+          name: projectId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: targetRole
+          required: false
+          schema:
+            type: string
+            enum: [product, backend, frontend, test]
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [draft, in_review, published, accepted, in_development, in_testing, done, rejected]
+      responses:
+        "200":
+          description: Requirement handoff list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseRequirementHandoffList"
+
+  /api/v1/requirement-handoffs/{handoffId}/accept:
+    post:
+      summary: Accept a published requirement handoff
+      parameters:
+        - in: path
+          name: handoffId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Requirement handoff accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseRequirementHandoff"
+
+  /api/v1/requirement-handoffs/{handoffId}/transition:
+    post:
+      summary: Transition requirement handoff state
+      parameters:
+        - in: path
+          name: handoffId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransitionRequirementHandoffRequest"
+      responses:
+        "200":
+          description: Requirement handoff transitioned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseRequirementHandoff"
+
+  /api/v1/requirement-handoffs/{handoffId}/tasks/ai-generate:
+    post:
+      summary: Generate role task plan by AI for requirement handoff
+      parameters:
+        - in: path
+          name: handoffId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: AI task plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseAiTaskPlan"
+
+  /api/v1/requirement-handoffs/{handoffId}/tasks:
+    get:
+      summary: List requirement tasks under handoff
+      parameters:
+        - in: path
+          name: handoffId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Requirement task list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseRequirementTaskList"
+
+  /api/v1/requirement-handoffs/tasks/{taskId}/claim:
+    post:
+      summary: Claim requirement task to current actor
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Requirement task claimed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseRequirementTask"
+
+  /api/v1/requirement-handoffs/tasks/{taskId}/status:
+    put:
+      summary: Update requirement task status
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRequirementTaskStatusRequest"
+      responses:
+        "200":
+          description: Requirement task updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseRequirementTask"
+
+  /api/v1/tasks:
+    get:
+      summary: List tasks for task center views
+      parameters:
+        - in: query
+          name: view
+          required: false
+          schema:
+            type: string
+            enum: [pool, mine, all]
+            default: pool
+        - in: query
+          name: projectId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [todo, in_progress, done, blocked]
+        - in: query
+          name: role
+          required: false
+          schema:
+            type: string
+            enum: [product, backend, frontend, test]
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        "200":
+          description: Task center page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTaskCenterPage"
+  /api/v1/tasks/{taskId}:
+    get:
+      summary: Get task detail with requirement handoff context
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Requirement task detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseRequirementTaskDetail"
+
   /api/v1/audit-logs:
     get:
       summary: List audit logs
@@ -141,6 +926,28 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponseAuditLogList"
 
+  /api/v1/audit-logs/workspace-options:
+    get:
+      summary: List workspace audit filter options
+      responses:
+        "200":
+          description: Workspace filter option list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseWorkspaceAuditFilterList"
+
+  /api/v1/audit-logs/project-options:
+    get:
+      summary: List project audit filter options
+      responses:
+        "200":
+          description: Project filter option list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProjectAuditFilterList"
+
 components:
   schemas:
     ApiResponseHealth:
@@ -154,6 +961,51 @@ components:
           example: OK
         data:
           $ref: "#/components/schemas/HealthData"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseLogin:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/LoginData"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseUserProfile:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/UserProfile"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseString:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: string
         timestamp:
           type: string
           format: date-time
@@ -175,6 +1027,141 @@ components:
         requestId:
           type: string
 
+    ApiResponseProject:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/Project"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseProductDoc:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/ProductDoc"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseProductDocDetail:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/ProductDocDetail"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseProductDocVersion:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/ProductDocVersion"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseChatSession:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/ChatSession"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseRequirementHandoff:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/RequirementHandoff"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseChatMessage:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/ChatMessage"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseAiDraft:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/AiDraft"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseAiTaskPlan:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/AiTaskPlan"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
     ApiResponseWorkspaceList:
       type: object
       properties:
@@ -186,6 +1173,234 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Workspace"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseProjectList:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Project"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseProductDocList:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductDoc"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseProductDocVersionList:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductDocVersion"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseProductDocAiMessageList:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductDocAiMessage"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseProductDocAiGenerate:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/ProductDocAiGenerate"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseProductDocRevision:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/ProductDocRevision"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseProductDocRevisionList:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductDocRevision"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseChatSessionList:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatSession"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseRequirementHandoffList:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequirementHandoff"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseChatMessageList:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseRequirementTask:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/RequirementTask"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseRequirementTaskDetail:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/RequirementTaskDetail"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseRequirementTaskList:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequirementTask"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseTaskCenterPage:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/TaskCenterPage"
         timestamp:
           type: string
           format: date-time
@@ -226,6 +1441,40 @@ components:
         requestId:
           type: string
 
+    ApiResponseWorkspaceAuditFilterList:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceAuditFilterOption"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+    ApiResponseProjectAuditFilterList:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProjectAuditFilterOption"
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
     ApiErrorResponse:
       type: object
       properties:
@@ -254,6 +1503,28 @@ components:
         message:
           type: string
 
+    UserProfile:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        username:
+          type: string
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [product, backend, frontend, test, pmo, admin]
+
+    LoginData:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserProfile"
+
     Workspace:
       type: object
       properties:
@@ -275,6 +1546,412 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, archived]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProductDoc:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, archived]
+        ownerActor:
+          type: string
+        currentVersionId:
+          type: string
+          format: uuid
+        currentVersionNo:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProductDocVersion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        docId:
+          type: string
+          format: uuid
+        versionNo:
+          type: integer
+        parentVersionId:
+          type: string
+          format: uuid
+        content:
+          type: string
+        changeSummary:
+          type: string
+        sourceType:
+          type: string
+          enum: [manual, ai_confirm, rollback]
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ProductDocDetail:
+      allOf:
+        - $ref: "#/components/schemas/ProductDoc"
+        - type: object
+          properties:
+            draftContent:
+              type: string
+            currentVersion:
+              $ref: "#/components/schemas/ProductDocVersion"
+
+    ProductDocAiMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        docId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ProductDocRevision:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        docId:
+          type: string
+          format: uuid
+        sourceVersionId:
+          type: string
+          format: uuid
+        baseContent:
+          type: string
+        candidateContent:
+          type: string
+        instruction:
+          type: string
+        changeSummary:
+          type: string
+        status:
+          type: string
+          enum: [pending, confirmed, rejected]
+        modelProvider:
+          type: string
+        modelName:
+          type: string
+        createdBy:
+          type: string
+        confirmedBy:
+          type: string
+        confirmedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProductDocAiGenerate:
+      type: object
+      properties:
+        assistantMessage:
+          $ref: "#/components/schemas/ProductDocAiMessage"
+        revision:
+          $ref: "#/components/schemas/ProductDocRevision"
+
+    ChatSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        ownerActor:
+          type: string
+        role:
+          type: string
+          enum: [product, backend, frontend, test]
+        title:
+          type: string
+        status:
+          type: string
+          enum: [active, archived]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RequirementHandoff:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        sourceSessionId:
+          type: string
+          format: uuid
+        version:
+          type: integer
+        title:
+          type: string
+        requirementSummary:
+          type: string
+        acceptanceCriteria:
+          type: string
+        impactScope:
+          type: string
+        priority:
+          type: string
+          enum: [P0, P1, P2, P3]
+        targetRole:
+          type: string
+          enum: [product, backend, frontend, test]
+        status:
+          type: string
+          enum: [draft, in_review, published, accepted, in_development, in_testing, done, rejected]
+        publishedBy:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        acceptedBy:
+          type: string
+        acceptedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RequirementTask:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        handoffId:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [product, backend, frontend, test]
+        title:
+          type: string
+        titleZh:
+          type: string
+        titleEn:
+          type: string
+        description:
+          type: string
+        descriptionZh:
+          type: string
+        descriptionEn:
+          type: string
+        estimateHours:
+          type: integer
+        status:
+          type: string
+          enum: [todo, in_progress, done, blocked]
+        assignee:
+          type: string
+        source:
+          type: string
+          enum: [ai, manual]
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RequirementTaskDetail:
+      allOf:
+        - $ref: "#/components/schemas/RequirementTask"
+        - type: object
+          properties:
+            projectName:
+              type: string
+            handoffTitle:
+              type: string
+            handoffRequirementSummary:
+              type: string
+            handoffAcceptanceCriteria:
+              type: string
+            handoffImpactScope:
+              type: string
+            handoffPriority:
+              type: string
+              enum: [P0, P1, P2, P3]
+            handoffTargetRole:
+              type: string
+              enum: [product, backend, frontend, test]
+            handoffStatus:
+              type: string
+              enum: [draft, in_review, published, accepted, in_development, in_testing, done, rejected]
+
+    TaskCenterPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequirementTask"
+        total:
+          type: integer
+          format: int64
+        page:
+          type: integer
+        size:
+          type: integer
+        hasNext:
+          type: boolean
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    AiDraft:
+      type: object
+      properties:
+        title:
+          type: string
+        requirementSummary:
+          type: string
+        acceptanceCriteria:
+          type: string
+        impactScope:
+          type: string
+        priority:
+          type: string
+          enum: [P0, P1, P2, P3]
+        targetRole:
+          type: string
+          enum: [product, backend, frontend, test]
+        suggestedTasks:
+          type: array
+          items:
+            type: string
+        impactedFiles:
+          type: array
+          items:
+            type: string
+        riskHints:
+          type: array
+          items:
+            type: string
+        testHints:
+          type: array
+          items:
+            type: string
+        aiReply:
+          type: string
+        provider:
+          type: string
+        model:
+          type: string
+
+    AiTaskPlan:
+      type: object
+      properties:
+        handoffId:
+          type: string
+          format: uuid
+        tasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequirementTask"
+        impactedFiles:
+          type: array
+          items:
+            type: string
+        riskHints:
+          type: array
+          items:
+            type: string
+        testHints:
+          type: array
+          items:
+            type: string
+        provider:
+          type: string
+        model:
+          type: string
+        rationale:
+          type: string
 
     AuditLog:
       type: object
@@ -299,6 +1976,26 @@ components:
         createdAt:
           type: string
           format: date-time
+
+    WorkspaceAuditFilterOption:
+      type: object
+      properties:
+        resourceId:
+          type: string
+        name:
+          type: string
+        deleted:
+          type: boolean
+
+    ProjectAuditFilterOption:
+      type: object
+      properties:
+        resourceId:
+          type: string
+        name:
+          type: string
+        deleted:
+          type: boolean
 
     CreateWorkspaceRequest:
       type: object
@@ -326,3 +2023,174 @@ components:
         defaultLanguage:
           type: string
           enum: [zh-CN, en-US]
+
+    CreateProjectRequest:
+      type: object
+      required: [workspaceId, name, status]
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, archived]
+
+    CreateProductDocRequest:
+      type: object
+      required: [projectId, title]
+      properties:
+        projectId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 200
+        initialContent:
+          type: string
+
+    UpdateProductDocRequest:
+      type: object
+      required: [title, draftContent, status]
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        draftContent:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, archived]
+
+    PublishProductDocVersionRequest:
+      type: object
+      properties:
+        changeSummary:
+          type: string
+          maxLength: 500
+        sourceType:
+          type: string
+          enum: [manual, ai_confirm]
+          default: manual
+
+    RollbackProductDocRequest:
+      type: object
+      required: [targetVersionId]
+      properties:
+        targetVersionId:
+          type: string
+          format: uuid
+        changeSummary:
+          type: string
+          maxLength: 500
+
+    CreateProductDocAiMessageRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          maxLength: 4000
+
+    ConfirmProductDocRevisionRequest:
+      type: object
+      properties:
+        changeSummary:
+          type: string
+          maxLength: 500
+
+    RejectProductDocRevisionRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          maxLength: 500
+
+    UpdateProjectRequest:
+      type: object
+      required: [name, status]
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [draft, active, archived]
+
+    CreateChatSessionRequest:
+      type: object
+      required: [projectId, title]
+      properties:
+        projectId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 200
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    CreateChatMessageRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          maxLength: 8000
+
+    GenerateAiDraftRequest:
+      type: object
+      properties:
+        requirementInput:
+          type: string
+        priority:
+          type: string
+          enum: [P0, P1, P2, P3]
+          default: P2
+        targetRole:
+          type: string
+          enum: [product, backend, frontend, test]
+          default: backend
+
+    TransitionRequirementHandoffRequest:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [submit_review, publish, accept, start_dev, start_test, complete, reject, reopen]
+
+    UpdateRequirementTaskStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [todo, in_progress, done, blocked]
+
+    PublishRequirementHandoffRequest:
+      type: object
+      required: [title, requirementSummary, acceptanceCriteria, priority, targetRole]
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        requirementSummary:
+          type: string
+        acceptanceCriteria:
+          type: string
+        impactScope:
+          type: string
+        priority:
+          type: string
+          enum: [P0, P1, P2, P3]
+        targetRole:
+          type: string
+          enum: [product, backend, frontend, test]

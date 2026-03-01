@@ -27,4 +27,10 @@ T0 skeleton for a full-stack, front-back separated workspace.
 - `GET /api/v1/workspaces`
 - `PUT /api/v1/workspaces/{workspaceId}`
 - `DELETE /api/v1/workspaces/{workspaceId}`
+- `POST /api/v1/projects`
+- `GET /api/v1/projects`
+- `PUT /api/v1/projects/{projectId}`
+- `DELETE /api/v1/projects/{projectId}`
 - `GET /api/v1/audit-logs`
+- `GET /api/v1/audit-logs/workspace-options`
+- `GET /api/v1/audit-logs/project-options`

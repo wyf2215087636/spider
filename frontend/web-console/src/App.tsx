@@ -1,187 +1,202 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  createWorkspace,
-  deleteWorkspace,
-  fetchHealth,
-  listAuditLogs,
-  listWorkspaces,
-  updateWorkspace,
-  type AuditLogItem,
-  type HealthResult,
-  type WorkspaceItem
-} from "./api/client";
+import { Navigate, NavLink, Route, Routes } from "react-router-dom";
+import { login, logout, me, readAuthToken, writeAuthToken, type UserProfile } from "./api/client";
+import HandoffCenterPage from "./pages/collab/HandoffCenterPage";
+import ProjectPage from "./pages/collab/ProjectPage";
+import ProductDocCenterPage from "./pages/collab/ProductDocCenterPage";
+import TaskCenterPage from "./pages/collab/TaskCenterPage";
+import WorkspacePage from "./pages/collab/WorkspacePage";
+import LoginPage from "./pages/LoginPage";
+import AuditPage from "./pages/runtime/AuditPage";
+import HealthPage from "./pages/runtime/HealthPage";
+
+interface MenuItem {
+  key: string;
+  labelKey: string;
+  to: string;
+}
+
+interface MenuGroup {
+  key: string;
+  labelKey: string;
+  items: MenuItem[];
+}
+
+function SidebarMenu({
+  groups,
+  collapsedKeys,
+  onToggle,
+  t
+}: {
+  groups: MenuGroup[];
+  collapsedKeys: Set<string>;
+  onToggle: (key: string) => void;
+  t: (key: string) => string;
+}) {
+  return (
+    <ul className="menuLevel menuLevel1">
+      {groups.map((group) => {
+        const collapsed = collapsedKeys.has(group.key);
+        return (
+          <li key={group.key} className="menuItem">
+            <button className="menuGroupToggle" type="button" onClick={() => onToggle(group.key)}>
+              <span className="menuGroupTitle">{t(group.labelKey)}</span>
+              <span className="menuGroupArrow">{collapsed ? "+" : "-"}</span>
+            </button>
+            {!collapsed ? (
+              <ul className="menuLevel menuLevel2">
+                {group.items.map((item) => (
+                  <li key={item.key} className="menuItem">
+                    <NavLink
+                      to={item.to}
+                      className={({ isActive }) => (isActive ? "menuLink active" : "menuLink")}
+                    >
+                      {t(item.labelKey)}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 function App() {
   const { t, i18n } = useTranslation();
-  const [loading, setLoading] = useState(false);
-  const [health, setHealth] = useState<HealthResult | null>(null);
-  const [error, setError] = useState<string>("");
 
-  const [workspaceLoading, setWorkspaceLoading] = useState(false);
-  const [workspaceError, setWorkspaceError] = useState<string>("");
-  const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>([]);
-
-  const [auditLoading, setAuditLoading] = useState(false);
-  const [auditError, setAuditError] = useState<string>("");
-  const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>([]);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState("");
-
-  const [name, setName] = useState("");
-  const [owner, setOwner] = useState("");
-  const [defaultLanguage, setDefaultLanguage] = useState<"zh-CN" | "en-US">("zh-CN");
-
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editOwner, setEditOwner] = useState("");
-  const [editStatus, setEditStatus] = useState("active");
-  const [editLanguage, setEditLanguage] = useState<"zh-CN" | "en-US">("zh-CN");
-
-  const languageLabel = useMemo(() => {
-    return i18n.language === "zh-CN" ? "ZH" : "EN";
-  }, [i18n.language]);
-
-  const loadWorkspaces = async () => {
-    try {
-      setWorkspaceLoading(true);
-      setWorkspaceError("");
-      const data = await listWorkspaces(i18n.language);
-      setWorkspaces(data);
-      if (selectedWorkspaceId && !data.find((w) => w.id === selectedWorkspaceId)) {
-        setSelectedWorkspaceId("");
+  const languageLabel = useMemo(() => (i18n.language === "zh-CN" ? "ZH" : "EN"), [i18n.language]);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState("");
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const menuGroups = useMemo<MenuGroup[]>(
+    () => {
+      if (!user) {
+        return [];
       }
-    } catch (e) {
-      setWorkspaceError(e instanceof Error ? e.message : t("errorUnknown"));
-    } finally {
-      setWorkspaceLoading(false);
-    }
-  };
 
-  const loadAuditLogs = async (resourceId?: string) => {
-    try {
-      setAuditLoading(true);
-      setAuditError("");
-      const data = await listAuditLogs(i18n.language, {
-        resourceType: "workspace",
-        resourceId: resourceId || undefined,
-        limit: 20
-      });
-      setAuditLogs(data);
-    } catch (e) {
-      setAuditError(e instanceof Error ? e.message : t("errorUnknown"));
-    } finally {
-      setAuditLoading(false);
-    }
-  };
+      const allItems = {
+        workspace: { key: "workspace-list", labelKey: "menuWorkspace", to: "/workspaces" } satisfies MenuItem,
+        project: { key: "project-list", labelKey: "menuProject", to: "/projects" } satisfies MenuItem,
+        docCenter: { key: "doc-center", labelKey: "menuDocCenter", to: "/product-docs" } satisfies MenuItem,
+        handoff: { key: "handoff-center", labelKey: "menuHandoffCenter", to: "/handoffs" } satisfies MenuItem,
+        tasks: { key: "task-center", labelKey: "menuTaskCenter", to: "/tasks" } satisfies MenuItem,
+        audit: { key: "audit-logs", labelKey: "menuAudit", to: "/audit" } satisfies MenuItem,
+        health: { key: "system-health", labelKey: "menuHealth", to: "/health" } satisfies MenuItem
+      };
+
+      if (user.role === "admin") {
+        return [
+          { key: "collab", labelKey: "menuGroupCollab", items: [allItems.workspace, allItems.project, allItems.docCenter, allItems.handoff, allItems.tasks] },
+          { key: "runtime", labelKey: "menuGroupRuntime", items: [allItems.audit, allItems.health] }
+        ];
+      }
+      if (user.role === "product") {
+        return [
+          { key: "collab", labelKey: "menuGroupCollab", items: [allItems.workspace, allItems.project, allItems.docCenter, allItems.handoff, allItems.tasks] },
+          { key: "runtime", labelKey: "menuGroupRuntime", items: [allItems.health] }
+        ];
+      }
+      if (user.role === "pmo") {
+        return [
+          { key: "collab", labelKey: "menuGroupCollab", items: [allItems.project, allItems.docCenter, allItems.handoff, allItems.tasks] },
+          { key: "runtime", labelKey: "menuGroupRuntime", items: [allItems.audit, allItems.health] }
+        ];
+      }
+      return [
+        { key: "collab", labelKey: "menuGroupCollab", items: [allItems.docCenter, allItems.handoff, allItems.tasks] },
+        { key: "runtime", labelKey: "menuGroupRuntime", items: [allItems.health] }
+      ];
+    },
+    [user]
+  );
+  const visiblePaths = useMemo(
+    () => new Set(menuGroups.flatMap((group) => group.items.map((item) => item.to))),
+    [menuGroups]
+  );
+  const defaultPath = useMemo(
+    () => menuGroups.flatMap((group) => group.items.map((item) => item.to))[0] || "/health",
+    [menuGroups]
+  );
+  const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    void loadWorkspaces();
+    const token = readAuthToken();
+    if (!token) {
+      setAuthLoading(false);
+      setUser(null);
+      return;
+    }
+    void (async () => {
+      try {
+        const profile = await me(i18n.language);
+        setUser(profile);
+        setAuthError("");
+      } catch {
+        writeAuthToken("");
+        setUser(null);
+      } finally {
+        setAuthLoading(false);
+      }
+    })();
   }, [i18n.language]);
-
-  useEffect(() => {
-    void loadAuditLogs(selectedWorkspaceId || undefined);
-  }, [i18n.language, selectedWorkspaceId]);
 
   const toggleLanguage = async () => {
     const next = i18n.language === "zh-CN" ? "en-US" : "zh-CN";
     await i18n.changeLanguage(next);
   };
 
-  const checkHealth = async () => {
+  const onLogin = async (username: string, password: string) => {
     try {
-      setLoading(true);
-      setError("");
-      const data = await fetchHealth(i18n.language);
-      setHealth(data);
+      setAuthLoading(true);
+      setAuthError("");
+      const result = await login(i18n.language, { username, password });
+      writeAuthToken(result.token);
+      setUser(result.user);
     } catch (e) {
-      setError(e instanceof Error ? e.message : t("errorUnknown"));
-      setHealth(null);
+      setAuthError(e instanceof Error ? e.message : t("errorUnknown"));
+      setUser(null);
     } finally {
-      setLoading(false);
+      setAuthLoading(false);
     }
   };
 
-  const onCreateWorkspace = async () => {
+  const onLogout = async () => {
     try {
-      if (!name.trim() || !owner.trim()) {
-        setWorkspaceError(t("workspaceRequired"));
-        return;
+      await logout(i18n.language);
+    } catch {
+      // ignore logout errors and clear local state anyway
+    }
+    writeAuthToken("");
+    setUser(null);
+  };
+
+  const toggleGroup = (key: string) => {
+    setCollapsedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
       }
-      setWorkspaceLoading(true);
-      setWorkspaceError("");
-      await createWorkspace(i18n.language, {
-        name: name.trim(),
-        owner: owner.trim(),
-        defaultLanguage
-      });
-      setName("");
-      setOwner("");
-      await loadWorkspaces();
-      await loadAuditLogs(selectedWorkspaceId || undefined);
-    } catch (e) {
-      setWorkspaceError(e instanceof Error ? e.message : t("errorUnknown"));
-    } finally {
-      setWorkspaceLoading(false);
-    }
+      return next;
+    });
   };
 
-  const onStartEdit = (item: WorkspaceItem) => {
-    setEditingId(item.id);
-    setEditName(item.name);
-    setEditOwner(item.owner);
-    setEditStatus(item.status);
-    setEditLanguage(item.defaultLanguage);
-  };
-
-  const onCancelEdit = () => {
-    setEditingId(null);
-    setEditName("");
-    setEditOwner("");
-    setEditStatus("active");
-    setEditLanguage("zh-CN");
-  };
-
-  const onSaveEdit = async (workspaceId: string) => {
-    try {
-      if (!editName.trim() || !editOwner.trim()) {
-        setWorkspaceError(t("workspaceRequired"));
-        return;
-      }
-      setWorkspaceLoading(true);
-      setWorkspaceError("");
-      await updateWorkspace(workspaceId, i18n.language, {
-        name: editName.trim(),
-        owner: editOwner.trim(),
-        status: editStatus,
-        defaultLanguage: editLanguage
-      });
-      onCancelEdit();
-      await loadWorkspaces();
-      await loadAuditLogs(selectedWorkspaceId || undefined);
-    } catch (e) {
-      setWorkspaceError(e instanceof Error ? e.message : t("errorUnknown"));
-    } finally {
-      setWorkspaceLoading(false);
-    }
-  };
-
-  const onDeleteWorkspace = async (workspaceId: string) => {
-    const confirmed = window.confirm(t("workspaceDeleteConfirm"));
-    if (!confirmed) {
-      return;
-    }
-    try {
-      setWorkspaceLoading(true);
-      setWorkspaceError("");
-      await deleteWorkspace(workspaceId, i18n.language);
-      await loadWorkspaces();
-      await loadAuditLogs(selectedWorkspaceId || undefined);
-    } catch (e) {
-      setWorkspaceError(e instanceof Error ? e.message : t("errorUnknown"));
-    } finally {
-      setWorkspaceLoading(false);
-    }
-  };
+  if (!user) {
+    return (
+      <LoginPage
+        loading={authLoading}
+        error={authError}
+        onSubmit={onLogin}
+        onToggleLanguage={toggleLanguage}
+        languageLabel={languageLabel}
+      />
+    );
+  }
 
   return (
     <main className="page">
@@ -190,150 +205,76 @@ function App() {
           <h1>{t("title")}</h1>
           <p>{t("subtitle")}</p>
         </div>
-        <button className="secondary" onClick={toggleLanguage}>
-          {t("language")} {languageLabel}
-        </button>
-      </header>
-
-      <section className="card">
-        <h2>{t("workspaceTitle")}</h2>
-        <p>{t("workspaceDesc")}</p>
-
-        <div className="formRow">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={t("workspaceName")}
-          />
-          <input
-            value={owner}
-            onChange={(e) => setOwner(e.target.value)}
-            placeholder={t("workspaceOwner")}
-          />
-          <select
-            value={defaultLanguage}
-            onChange={(e) => setDefaultLanguage(e.target.value as "zh-CN" | "en-US")}
-          >
-            <option value="zh-CN">zh-CN</option>
-            <option value="en-US">en-US</option>
-          </select>
-          <button onClick={onCreateWorkspace} disabled={workspaceLoading}>
-            {workspaceLoading ? t("loading") : t("workspaceCreate")}
+        <div className="headerActions">
+          <div className="actorLabel">{user.displayName} ({user.role})</div>
+          <button className="ghost" onClick={onLogout}>
+            {t("logout")}
+          </button>
+          <button className="secondary" onClick={toggleLanguage}>
+            {t("language")} {languageLabel}
           </button>
         </div>
+      </header>
 
-        <div className="workspaceList">
-          {workspaceLoading && <p>{t("loading")}</p>}
-          {!workspaceLoading && workspaces.length === 0 && <p>{t("workspaceEmpty")}</p>}
-          {!workspaceLoading &&
-            workspaces.map((item) => (
-              <article className="workspaceItem" key={item.id}>
-                {editingId === item.id ? (
-                  <div className="workspaceEditForm">
-                    <input value={editName} onChange={(e) => setEditName(e.target.value)} />
-                    <input value={editOwner} onChange={(e) => setEditOwner(e.target.value)} />
-                    <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
-                      <option value="active">active</option>
-                      <option value="archived">archived</option>
-                    </select>
-                    <select
-                      value={editLanguage}
-                      onChange={(e) => setEditLanguage(e.target.value as "zh-CN" | "en-US")}
-                    >
-                      <option value="zh-CN">zh-CN</option>
-                      <option value="en-US">en-US</option>
-                    </select>
-                    <div className="workspaceActions">
-                      <button onClick={() => onSaveEdit(item.id)}>{t("workspaceSave")}</button>
-                      <button className="ghost" onClick={onCancelEdit}>
-                        {t("workspaceCancel")}
-                      </button>
-                    </div>
-                  </div>
+      <div className="workspaceLayout">
+        <aside className="sidebar">
+          <div className="sidebarTitle">{t("menuTitle")}</div>
+          <SidebarMenu groups={menuGroups} collapsedKeys={collapsedKeys} onToggle={toggleGroup} t={t} />
+        </aside>
+
+        <section className="contentPane">
+          <Routes>
+            <Route path="/" element={<Navigate to={defaultPath} replace />} />
+            <Route
+              path="/workspaces"
+              element={visiblePaths.has("/workspaces") ? <WorkspacePage language={i18n.language} /> : <Navigate to={defaultPath} replace />}
+            />
+            <Route
+              path="/projects"
+              element={visiblePaths.has("/projects") ? <ProjectPage language={i18n.language} /> : <Navigate to={defaultPath} replace />}
+            />
+            <Route
+              path="/handoffs"
+              element={
+                visiblePaths.has("/handoffs") ? (
+                  <HandoffCenterPage language={i18n.language} currentRole={user.role} />
                 ) : (
-                  <>
-                    <div>
-                      <h3>{item.name}</h3>
-                      <p>
-                        {t("workspaceOwnerLabel")}: {item.owner}
-                      </p>
-                    </div>
-                    <div className="workspaceMeta">
-                      <span>{item.status}</span>
-                      <span>{item.defaultLanguage}</span>
-                      <div className="workspaceActions">
-                        <button onClick={() => onStartEdit(item)}>{t("workspaceEdit")}</button>
-                        <button className="danger" onClick={() => onDeleteWorkspace(item.id)}>
-                          {t("workspaceDelete")}
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </article>
-            ))}
-        </div>
-
-        {workspaceError && <p className="error">{workspaceError}</p>}
-      </section>
-
-      <section className="card">
-        <div className="auditHeader">
-          <div>
-            <h2>{t("auditTitle")}</h2>
-            <p>{t("auditDesc")}</p>
-          </div>
-          <div className="auditFilters">
-            <select
-              value={selectedWorkspaceId}
-              onChange={(e) => setSelectedWorkspaceId(e.target.value)}
-            >
-              <option value="">{t("auditFilterAll")}</option>
-              {workspaces.map((w) => (
-                <option value={w.id} key={w.id}>
-                  {w.name}
-                </option>
-              ))}
-            </select>
-            <button className="secondary" onClick={() => loadAuditLogs(selectedWorkspaceId || undefined)}>
-              {t("auditRefresh")}
-            </button>
-          </div>
-        </div>
-
-        <div className="auditList">
-          {auditLoading && <p>{t("loading")}</p>}
-          {!auditLoading && auditLogs.length === 0 && <p>{t("auditEmpty")}</p>}
-          {!auditLoading &&
-            auditLogs.map((item) => (
-              <article className="auditItem" key={item.id}>
-                <div className="auditTop">
-                  <strong>{item.action}</strong>
-                  <span>{item.status}</span>
-                </div>
-                <p>{item.details || "-"}</p>
-                <div className="auditMeta">
-                  <span>requestId: {item.requestId || "-"}</span>
-                  <span>actor: {item.actor || "-"}</span>
-                  <span>{item.createdAt || "-"}</span>
-                </div>
-              </article>
-            ))}
-        </div>
-
-        {auditError && <p className="error">{auditError}</p>}
-      </section>
-
-      <section className="card">
-        <h2>{t("healthCheck")}</h2>
-        <p>{t("healthDesc")}</p>
-        <button onClick={checkHealth} disabled={loading}>
-          {loading ? t("loading") : t("runHealth")}
-        </button>
-
-        {health && <pre className="result">{JSON.stringify(health, null, 2)}</pre>}
-        {error && <p className="error">{error}</p>}
-      </section>
+                  <Navigate to={defaultPath} replace />
+                )
+              }
+            />
+            <Route
+              path="/product-docs"
+              element={
+                visiblePaths.has("/product-docs") ? (
+                  <ProductDocCenterPage language={i18n.language} currentRole={user.role} currentActor={user.username} />
+                ) : (
+                  <Navigate to={defaultPath} replace />
+                )
+              }
+            />
+            <Route
+              path="/tasks"
+              element={
+                visiblePaths.has("/tasks") ? (
+                  <TaskCenterPage language={i18n.language} currentRole={user.role} currentActor={user.username} />
+                ) : (
+                  <Navigate to={defaultPath} replace />
+                )
+              }
+            />
+            <Route
+              path="/audit"
+              element={visiblePaths.has("/audit") ? <AuditPage language={i18n.language} /> : <Navigate to={defaultPath} replace />}
+            />
+            <Route
+              path="/health"
+              element={visiblePaths.has("/health") ? <HealthPage language={i18n.language} /> : <Navigate to={defaultPath} replace />}
+            />
+            <Route path="*" element={<Navigate to={defaultPath} replace />} />
+          </Routes>
+        </section>
+      </div>
     </main>
   );
 }

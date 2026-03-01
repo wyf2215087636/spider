@@ -13,9 +13,10 @@ body {
 }
 
 .page {
-  max-width: 1040px;
-  margin: 0 auto;
-  padding: 32px 20px 80px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 24px 24px 80px;
 }
 
 .header {
@@ -35,6 +36,169 @@ body {
   color: #475569;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.actorLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.loginPage {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.loginCard {
+  width: min(480px, 100%);
+  background: #ffffffd9;
+  border: 1px solid #dce3ee;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.loginHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.loginHeaderTag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid #bae6fd;
+  background: #f0f9ff;
+  color: #0c4a6e;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+}
+
+.loginCard h1 {
+  margin-top: 0;
+}
+
+.loginForm {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 8px;
+}
+
+.loginHint {
+  font-size: 12px;
+  color: #64748b;
+  margin: 8px 0 0;
+}
+
+.workspaceLayout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 20px;
+}
+
+.sidebar {
+  background: #ffffffcc;
+  border: 1px solid #dce3ee;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  padding: 14px 12px;
+  height: fit-content;
+  position: sticky;
+  top: 16px;
+}
+
+.sidebarTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+  padding: 0 8px;
+}
+
+.menuLevel {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menuLevel2 {
+  margin-left: 10px;
+  margin-top: 6px;
+}
+
+.menuItem {
+  margin: 4px 0;
+}
+
+.menuGroupToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #334155;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.menuGroupToggle:hover {
+  background: #f1f5f9;
+}
+
+.menuGroupTitle {
+  color: #0f172a;
+}
+
+.menuGroupArrow {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.menuLink {
+  display: block;
+  text-decoration: none;
+  color: #475569;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 13px;
+}
+
+.menuLink:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.menuLink.active {
+  background: #ecfeff;
+  border-color: #99f6e4;
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.contentPane {
+  min-width: 0;
+}
+
 .card {
   background: #ffffffcc;
   border: 1px solid #dce3ee;
@@ -48,7 +212,7 @@ body {
   margin-top: 0;
 }
 
-button {
+button:not(.menuGroupToggle) {
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -58,7 +222,7 @@ button {
   font-weight: 600;
 }
 
-button:disabled {
+button:not(.menuGroupToggle):disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -116,6 +280,22 @@ select {
   font-size: 13px;
 }
 
+.taskItem {
+  padding: 10px;
+  gap: 10px;
+}
+
+.taskItem h3 {
+  font-size: 14px;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.taskItem p {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .workspaceMeta {
   display: flex;
   flex-direction: column;
@@ -125,19 +305,470 @@ select {
   color: #475569;
 }
 
+.statusChip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusSuccess {
+  color: #166534;
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.statusDanger {
+  color: #991b1b;
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.statusDraft {
+  color: #92400e;
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+
+.statusInfo {
+  color: #0f766e;
+  border-color: #99f6e4;
+  background: #ecfeff;
+}
+
+.statusMuted {
+  color: #475569;
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
 .workspaceActions {
   display: flex;
   gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .workspaceActions button {
   padding: 8px 10px;
   font-size: 12px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.workspaceActions select {
+  min-width: 132px;
+  flex: 0 0 auto;
 }
 
 .workspaceEditForm {
   display: grid;
   grid-template-columns: 1fr 1fr 140px 140px auto;
+  width: 100%;
+  gap: 8px;
+}
+
+.projectFilterRow {
+  margin-bottom: 12px;
+}
+
+.projectFilterRow select {
+  min-width: 260px;
+}
+
+.handoffForm {
+  margin-top: 16px;
+}
+
+.handoffForm h3 {
+  margin-bottom: 8px;
+}
+
+.chatPanel {
+  margin-top: 16px;
+  border: 1px solid #dce3ee;
+  border-radius: 12px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.chatPanel h3 {
+  margin: 0 0 6px;
+}
+
+.chatPanel p {
+  margin: 0 0 8px;
+  color: #475569;
+}
+
+.chatMessages {
+  display: grid;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 4px;
+  margin-bottom: 8px;
+}
+
+.chatMessage {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fff;
+}
+
+.chatMessage p {
+  margin: 6px 0 0;
+  color: #0f172a;
+  white-space: pre-wrap;
+}
+
+.chatMessage-user {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.chatMessage-assistant {
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+}
+
+.chatMessage-system {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.chatMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.chatRole {
+  font-weight: 700;
+  color: #334155;
+}
+
+.chatComposer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chatComposer .textArea {
+  margin-bottom: 0;
+  min-height: 72px;
+}
+
+.textArea {
+  width: 100%;
+  min-height: 88px;
+  border: 1px solid #dce3ee;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  resize: vertical;
+}
+
+.handoffFilterRow {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 14px;
+}
+
+.taskCenterTabs {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.taskCenterFilters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.taskPagination {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  padding: 20px;
+}
+
+.modalCard {
+  width: min(860px, 100%);
+  max-height: 86vh;
+  overflow: auto;
+  background: #ffffff;
+  border: 1px solid #dce3ee;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.24);
+  padding: 16px;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.modalHeader h3 {
+  margin: 0;
+}
+
+.modalBody h4 {
+  margin: 14px 0 8px;
+}
+
+.modalBody p {
+  margin: 5px 0;
+  color: #334155;
+}
+
+.taskDetailReadonly {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.docLayout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 320px;
+  gap: 12px;
+}
+
+.docLayoutAiOnly {
+  grid-template-columns: 320px minmax(0, 1fr);
+}
+
+.docListPane,
+.docEditorPane,
+.docVersionPane {
+  border: 1px solid #dce3ee;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 12px;
+  min-width: 0;
+}
+
+.docAiMainPane {
+  border: 1px solid #dce3ee;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 12px;
+  min-width: 0;
+}
+
+.docAiDocHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.docAiDocHeader h3 {
+  margin: 0;
+}
+
+.docAiMainDesc {
+  margin: 8px 0 0;
+  color: #475569;
+  font-size: 13px;
+}
+
+.docFilterRow {
+  margin-bottom: 10px;
+}
+
+.docCreateCard {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.docListItem {
+  cursor: pointer;
+}
+
+.docListItemActive {
+  border-color: #99f6e4;
+  background: #ecfeff;
+}
+
+.docEditorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.docEditorHeader h3 {
+  margin: 0;
+}
+
+.docEditorText {
+  min-height: 360px;
+  margin-bottom: 8px;
+}
+
+.docFlowHint {
+  margin: 0 0 8px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 8px 10px;
+}
+
+.docFlowHint p {
+  margin: 2px 0;
+  font-size: 12px;
+  color: #475569;
+}
+
+.docDraftDirty {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.docDraftClean {
+  color: #166534;
+  font-weight: 600;
+}
+
+.docDraftApplied {
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.docRollbackCard {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.docRollbackCard h4 {
+  margin: 0;
+}
+
+.docVersionHistoryList {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.docPreviewContent {
+  white-space: pre-wrap;
+  margin: 0;
+  font-size: 12px;
+  color: #334155;
+}
+
+.docAiLayout {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.docAiMessages {
+  max-height: 300px;
+}
+
+.docAiRevisionPane {
+  border: 1px solid #dce3ee;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 12px;
+  min-width: 0;
+}
+
+.docAiRecordPane {
+  border: 1px solid #dce3ee;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 12px;
+  min-width: 0;
+}
+
+.docAiRecordHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.docAiRecordHeader h3 {
+  margin: 0;
+}
+
+.docAiMarkdownEditor {
+  min-height: 460px;
+}
+
+.docAiRecordActions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.docAiRevisionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.docAiRevisionHeader h3 {
+  margin: 0;
+}
+
+.docRevisionItem {
+  align-items: flex-start;
+}
+
+.docAiPreviewCard {
+  margin-top: 10px;
+}
+
+.docAiPreviewCard h4 {
+  margin: 0 0 8px;
+}
+
+.docAiActions {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.projectEditForm {
+  display: grid;
+  grid-template-columns: 1fr 140px auto;
   width: 100%;
   gap: 8px;
 }
@@ -202,11 +833,37 @@ select {
 }
 
 @media (max-width: 900px) {
+  .page {
+    padding-top: 20px;
+  }
+
+  .workspaceLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+  }
+
   .formRow {
     grid-template-columns: 1fr;
   }
 
+  .headerActions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .actorLabel {
+    width: auto;
+  }
+
   .workspaceEditForm {
+    grid-template-columns: 1fr;
+  }
+
+  .projectEditForm {
     grid-template-columns: 1fr;
   }
 
@@ -226,5 +883,33 @@ select {
     width: 100%;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .handoffFilterRow {
+    flex-direction: column;
+  }
+
+  .taskCenterTabs {
+    flex-direction: column;
+  }
+
+  .taskCenterFilters {
+    flex-direction: column;
+  }
+
+  .modalBackdrop {
+    padding: 10px;
+  }
+
+  .modalCard {
+    max-height: 92vh;
+  }
+
+  .docLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .docAiLayout {
+    grid-template-columns: 1fr;
   }
 }
