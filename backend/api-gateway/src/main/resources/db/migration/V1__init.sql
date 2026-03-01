@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS workspace (
+    id UUID PRIMARY KEY,
+    name VARCHAR(128) NOT NULL,
+    default_language VARCHAR(16) NOT NULL DEFAULT 'zh-CN',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS project (
+    id UUID PRIMARY KEY,
+    workspace_id UUID NOT NULL REFERENCES workspace(id),
+    name VARCHAR(128) NOT NULL,
+    status VARCHAR(32) NOT NULL DEFAULT 'draft',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.idea/
+.vscode/
+*.iml
+
+frontend/web-console/node_modules/
+frontend/web-console/dist/
+
+backend/**/target/
+
+.DS_Store
+Thumbs.db
